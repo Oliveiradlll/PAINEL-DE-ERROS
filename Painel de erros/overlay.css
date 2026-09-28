@@ -1,105 +1,140 @@
 /* ==========================================
-   Botão Retrátil (Sempre fixado na borda direita)
+   Botão Flutuante de Abertura (Toggle)
    ========================================== */
 #erros-toggle-btn {
-  position: fixed !important;
-  top: 40% !important;
-  right: 0 !important;
-  left: auto !important;
-  z-index: 2147483647 !important;
-  background-color: #6366f1 !important;
-  color: #ffffff !important;
-  padding: 14px 10px !important;
-  border-radius: 8px 0 0 8px !important;
-  cursor: pointer !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  writing-mode: vertical-rl !important;
-  text-orientation: mixed !important;
-  box-shadow: -2px 0 12px rgba(0,0,0,0.6) !important;
-  user-select: none !important;
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s !important;
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 99999;
+  
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  
+  padding: 16px 8px;
+  border-radius: 12px 0 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: none;
+  
+  box-shadow: -4px 0 15px rgba(79, 70, 229, 0.35);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 #erros-toggle-btn:hover {
-  background-color: #4f46e5 !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  padding-left: 12px;
+  box-shadow: -6px 0 20px rgba(79, 70, 229, 0.5);
 }
 
 #erros-toggle-btn.open {
-  right: 340px !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: -4px 0 15px rgba(239, 68, 68, 0.35);
 }
 
 /* ==========================================
-   Container do Painel Lateral (Modo Escuro)
+   Container do Painel Lateral
    ========================================== */
 #erros-sidebar-panel {
   position: fixed !important;
   top: 0 !important;
-  right: -350px !important;
+  right: -400px !important;
   left: auto !important;
-  width: 340px !important;
+  width: 380px !important;
   height: 100vh !important;
   z-index: 2147483646 !important;
-  background-color: #0f172a !important;
+  background-color: #0f172a !important; /* Slate 900 */
   border-left: 1px solid #1e293b !important;
-  box-shadow: -6px 0 20px rgba(0,0,0,0.6) !important;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.6) !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   color: #f8fafc !important;
   box-sizing: border-box !important;
-  padding: 18px !important;
+  padding: 20px !important;
   overflow-y: auto !important;
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 #erros-sidebar-panel.open {
   right: 0 !important;
 }
 
+/* Scrollbar Personalizada */
+#erros-sidebar-panel::-webkit-scrollbar {
+  width: 6px;
+}
+#erros-sidebar-panel::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
 /* ==========================================
-   Elementos Internos do Painel
+   Cabeçalho
    ========================================== */
 .erros-header {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  margin-bottom: 16px !important;
-  padding-bottom: 10px !important;
+  margin-bottom: 18px !important;
+  padding-bottom: 12px !important;
   border-bottom: 1px solid #1e293b !important;
 }
 
 .erros-header h2 {
   margin: 0 !important;
-  font-size: 17px !important;
+  font-size: 18px !important;
   font-weight: 700 !important;
   color: #f8fafc !important;
+  letter-spacing: -0.3px !important;
 }
 
 .erros-btn-close {
   background: transparent !important;
   border: none !important;
-  font-size: 20px !important;
+  font-size: 18px !important;
   cursor: pointer !important;
   color: #94a3b8 !important;
-  padding: 6px 10px !important;
+  padding: 4px 8px !important;
   border-radius: 6px !important;
+  transition: all 0.2s !important;
 }
 .erros-btn-close:hover { 
   background-color: #1e293b !important; 
   color: #f8fafc !important;
 }
 
+/* ==========================================
+   Cartões e Formulários
+   ========================================== */
 .erros-card {
-  background: #1e293b !important;
-  padding: 16px !important;
+  background: #1e293b !important; /* Slate 800 */
+  padding: 14px 16px !important;
   border-radius: 12px !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
   border: 1px solid #334155 !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
 }
 
 .erros-form-group { 
-  margin-bottom: 12px !important; 
+  margin-bottom: 0 !important; 
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
 }
 
 .erros-form-group label, 
@@ -108,22 +143,27 @@
   font-size: 11px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-  margin-bottom: 6px !important;
+  letter-spacing: 0.5px !important;
   color: #94a3b8 !important;
 }
 
 .erros-sidebar-panel input, 
 .erros-sidebar-panel select {
   width: 100% !important;
-  width: -webkit-fill-available !important;
-  padding: 10px 12px !important;
+  padding: 9px 12px !important;
   box-sizing: border-box !important;
   border-radius: 8px !important;
   border: 1px solid #334155 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   background-color: #0f172a !important;
   color: #f8fafc !important;
+  outline: none !important;
+  transition: border-color 0.2s !important;
+}
+
+.erros-sidebar-panel input:focus, 
+.erros-sidebar-panel select:focus {
+  border-color: #6366f1 !important;
 }
 
 .erros-sidebar-panel input::placeholder {
@@ -131,24 +171,83 @@
 }
 
 /* ==========================================
-   Estilização e Aumento de Tamanho dos Botões
+   Cards Retráteis (Collapsible)
+   ========================================== */
+.erros-card-collapsible {
+  padding: 0 !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+}
+
+.erros-card-header {
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  color: #f8fafc !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  letter-spacing: 0.5px !important;
+  outline: none !important;
+}
+
+.erros-card-header:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.erros-arrow {
+  transition: transform 0.25s ease !important;
+  font-size: 14px !important;
+  color: #94a3b8 !important;
+}
+
+.erros-card-body {
+  padding: 0 16px 14px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  max-height: 500px !important;
+  opacity: 1 !important;
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease !important;
+}
+
+/* Estado Recolhido / Fechado */
+.erros-card-collapsible.collapsed .erros-card-body {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+}
+
+.erros-card-collapsible.collapsed .erros-arrow {
+  transform: rotate(-90deg) !important;
+}
+
+/* ==========================================
+   Estilização dos Botões
    ========================================== */
 .erros-btn-primary {
   width: 100% !important;
-  padding: 12px !important;
+  padding: 10px !important;
   border-radius: 8px !important;
   border: none !important;
-  background-color: #ef4444 !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
   color: white !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  font-size: 14px !important;
-  margin-top: 6px !important;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3) !important;
-  transition: background-color 0.2s;
+  font-size: 13px !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3) !important;
+  transition: all 0.2s !important;
 }
 .erros-btn-primary:hover { 
-  background-color: #dc2626 !important; 
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
 }
 
 .erros-btn-secondary {
@@ -156,95 +255,91 @@
   color: white !important;
   border: none !important;
   border-radius: 8px !important;
-  padding: 12px 14px !important;
+  padding: 10px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   font-size: 13px !important;
   width: 100% !important;
-  margin-top: 6px !important;
-  box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25) !important;
+  transition: all 0.2s !important;
 }
 .erros-btn-secondary:hover {
   background-color: #0284c7 !important;
+  transform: translateY(-1px) !important;
 }
 
-/* Botão de Importar Planilha (Estilo Roxo/Índigo Destacado) */
 .erros-btn-import {
   background-color: #8b5cf6 !important;
   color: #ffffff !important;
   border: none !important;
-  padding: 12px !important;
+  padding: 10px !important;
   border-radius: 8px !important;
   font-weight: 700 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   width: 100% !important;
   cursor: pointer !important;
-  margin-top: 10px !important;
-  box-sizing: border-box !important;
-  text-align: center !important;
-  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3) !important;
-  transition: background-color 0.2s;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25) !important;
+  transition: all 0.2s !important;
 }
 .erros-btn-import:hover {
   background-color: #7c3aed !important;
+  transform: translateY(-1px) !important;
 }
 
-/* Botão de Exportar para Excel (Estilo Verde Destacado) */
 .erros-btn-success {
   background-color: #10b981 !important;
   color: #ffffff !important;
   border: none !important;
-  padding: 12px !important;
+  padding: 10px !important;
   border-radius: 8px !important;
   font-weight: 700 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   width: 100% !important;
   cursor: pointer !important;
-  margin-top: 8px !important;
-  box-sizing: border-box !important;
-  text-align: center !important;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3) !important;
-  transition: background-color 0.2s;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25) !important;
+  transition: all 0.2s !important;
 }
 .erros-btn-success:hover {
   background-color: #059669 !important;
+  transform: translateY(-1px) !important;
 }
 
-/* Botão de Limpar / Zerar Dados */
 .erros-btn-clear {
   width: 100% !important;
-  background: transparent !important;
-  color: #94a3b8 !important;
-  border: 1px solid #334155 !important;
-  padding: 10px !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  padding: 9px !important;
   border-radius: 8px !important;
   font-size: 12px !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
-  margin-top: 10px !important;
-  transition: all 0.2s;
+  transition: all 0.2s !important;
 }
 .erros-btn-clear:hover { 
-  background-color: #450a0a !important; 
-  color: #fca5a5 !important;
-  border-color: #7f1d1d !important;
+  background-color: #ef4444 !important; 
+  color: #ffffff !important;
 }
 
 .erros-section-title {
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   color: #94a3b8 !important;
   text-transform: uppercase !important;
-  margin: 18px 0 8px 0 !important;
+  letter-spacing: 0.6px !important;
+  margin: 16px 0 8px 0 !important;
 }
 
 /* ==========================================
-   Lista e itens do Ranking (Modo Escuro)
+   Lista e itens do Ranking
    ========================================== */
 .erros-sidebar-panel ul { 
   list-style: none !important; 
   padding: 0 !important; 
   margin: 0 !important; 
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
 }
 
 .erros-sidebar-panel li.ranking-item,
@@ -252,57 +347,59 @@
   background: #1e293b !important;
   border: 1px solid #334155 !important;
   color: #f8fafc !important;
-  padding: 12px !important;
+  padding: 10px 12px !important;
   border-radius: 10px !important;
-  margin-bottom: 8px !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
   font-size: 13px !important;
+  transition: border-color 0.2s !important;
 }
 
-/* ==========================================
-   Destaque dos 3 Primeiros Patamares
-   ========================================== */
+.erros-sidebar-panel li.ranking-item:hover,
+#erros-lista-ranking > li:hover {
+  border-color: #475569 !important;
+}
+
+/* --- Destaque do Top 3 --- */
 #erros-lista-ranking > li.rank-primeiro,
 .ranking-container .ranking-item.rank-primeiro {
-  background: linear-gradient(135deg, #422006 0%, #713f12 100%) !important;
-  border: 1px solid #ca8a04 !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, #1e293b 100%) !important;
+  border: 1px solid #f59e0b !important;
   color: #fef08a !important;
 }
 
 #erros-lista-ranking > li.rank-segundo,
 .ranking-container .ranking-item.rank-segundo {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.1) 0%, #1e293b 100%) !important;
   border: 1px solid #94a3b8 !important;
   color: #f1f5f9 !important;
 }
 
 #erros-lista-ranking > li.rank-terceiro,
 .ranking-container .ranking-item.rank-terceiro {
-  background: linear-gradient(135deg, #431407 0%, #7c2d12 100%) !important;
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.1) 0%, #1e293b 100%) !important;
   border: 1px solid #ea580c !important;
   color: #ffedd5 !important;
 }
 
 .erros-count {
   font-weight: 700 !important;
-  background: #450a0a !important;
-  color: #fca5a5 !important;
-  padding: 3px 10px !important;
-  border-radius: 14px !important;
-  font-size: 12px !important;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  padding: 3px 8px !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
 }
 
-/* Botões de ação no ranking (Editar e Excluir) */
 .erros-btn-action {
   background: transparent !important;
   border: none !important;
-  color: #94a3b8 !important;
+  color: #64748b !important;
   cursor: pointer !important;
-  font-size: 13px !important;
-  padding: 4px 6px !important;
-  border-radius: 6px !important;
+  font-size: 12px !important;
+  padding: 3px 5px !important;
+  border-radius: 4px !important;
 }
 .erros-btn-action:hover {
   background-color: #334155 !important;
@@ -321,7 +418,8 @@
   left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  background-color: rgba(0, 0, 0, 0.7) !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(4px) !important;
   z-index: 2147483647 !important;
   display: flex !important;
   justify-content: center !important;
@@ -332,16 +430,16 @@
 .erros-modal-content {
   background-color: #0f172a !important;
   border: 1px solid #334155 !important;
-  padding: 24px !important;
+  padding: 20px !important;
   border-radius: 12px !important;
-  width: 300px !important;
+  width: 320px !important;
   color: #f8fafc !important;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.6) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
 }
 
 .erros-modal-content h3 {
   margin-top: 0 !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 14px !important;
   font-size: 16px !important;
   font-weight: 700 !important;
 }
@@ -357,7 +455,7 @@
 
 .erros-modal-content input {
   width: 100% !important;
-  padding: 10px 12px !important;
+  padding: 9px 12px !important;
   box-sizing: border-box !important;
   border-radius: 8px !important;
   border: 1px solid #334155 !important;
@@ -370,7 +468,7 @@
 .erros-modal-actions {
   display: flex !important;
   gap: 10px !important;
-  margin-top: 16px !important;
+  margin-top: 14px !important;
 }
 
 .erros-modal-actions button {
