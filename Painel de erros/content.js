@@ -598,14 +598,14 @@
   // --- Interface do Painel ---
   const toggleBtn = document.createElement('div');
   toggleBtn.id = 'erros-toggle-btn';
-  toggleBtn.innerText = '⚠️ PAINEL ERROS';
+  toggleBtn.innerText = '❌ Dashboard ';
 
   const panel = document.createElement('div');
   panel.id = 'erros-sidebar-panel';
   panel.className = 'erros-sidebar-panel';
   panel.innerHTML = `
     <div class="erros-header">
-      <h2>Dashboard de Erros</h2>
+      <h2>Dashboard - Ranking 📊 </h2>
       <button class="erros-btn-close" id="erros-close-panel">✕</button>
     </div>
 
