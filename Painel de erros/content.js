@@ -6,20 +6,18 @@
   const FIRESTORE_BASE_URL = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents`;
 
   const atendentesPadrao = [
-    { nome: "Caue", setor: "Geral", provedora: "Principal" }
+    { nome: "Caua", setor: "Geral", provedora: "Principal" }
   ];
   let estadoAtendentes = []; 
   let estadoErros = {};
   let setorFiltroAtual = "TODOS";
   let provedoraFiltroAtual = "TODAS";
 
-  // Função auxiliar para normalizar texto (ignora maiúsculas/minúsculas e acentos)
   const normalizarTexto = (str) => 
     (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 
   // --- API REST do Firestore ---
   
-  // Buscar documento específico
   async function firestoreGetDoc(collection, docId) {
     try {
       const res = await fetch(`${FIRESTORE_BASE_URL}/${collection}/${docId}`);
@@ -32,7 +30,6 @@
     }
   }
 
-  // Buscar TODOS os documentos de uma coleção
   async function firestoreGetCollection(collection) {
     try {
       const res = await fetch(`${FIRESTORE_BASE_URL}/${collection}`);
@@ -51,7 +48,6 @@
     }
   }
 
-  // Criar ou atualizar documento
   async function firestoreSetDoc(collection, docId, dataObject) {
     try {
       const formattedFields = formatFirestoreFields(dataObject);
@@ -73,7 +69,6 @@
     }
   }
 
-  // Excluir documento específico no Firestore
   async function firestoreDeleteDoc(collection, docId) {
     try {
       const url = `${FIRESTORE_BASE_URL}/${collection}/${docId}`;
@@ -89,42 +84,63 @@
     if (!fields) return {};
     const result = {};
     for (const key in fields) {
-      const val = fields[key];
-      if (val.stringValue !== undefined) result[key] = val.stringValue;
-      else if (val.integerValue !== undefined) result[key] = parseInt(val.integerValue, 10);
-      else if (val.doubleValue !== undefined) result[key] = parseFloat(val.doubleValue);
-      else if (val.booleanValue !== undefined) result[key] = val.booleanValue;
-      else if (val.arrayValue !== undefined) {
-        result[key] = (val.arrayValue.values || []).map(v => {
-          if (v.stringValue) {
-            try { return JSON.parse(v.stringValue); } catch(err) { return v.stringValue; }
-          }
-          return v.integerValue || v.doubleValue || v;
-        });
-      }
+      result[key] = parseFirestoreValue(fields[key]);
     }
     return result;
+  }
+
+  function parseFirestoreValue(val) {
+    if (!val) return null;
+    if (val.stringValue !== undefined) {
+      let valor = val.stringValue;
+      try {
+        const parsed = JSON.parse(valor);
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed;
+        }
+      } catch (e) {}
+      return valor;
+    }
+    if (val.integerValue !== undefined) return parseInt(val.integerValue, 10);
+    if (val.doubleValue !== undefined) return parseFloat(val.doubleValue);
+    if (val.booleanValue !== undefined) return val.booleanValue;
+    if (val.mapValue !== undefined) return parseFirestoreFields(val.mapValue.fields);
+    if (val.arrayValue !== undefined) {
+      return (val.arrayValue.values || []).map(v => parseFirestoreValue(v));
+    }
+    return null;
   }
 
   function formatFirestoreFields(obj) {
     const fields = {};
     for (const key in obj) {
       if (key.startsWith('_')) continue;
-      const val = obj[key];
-      
-      if (typeof val === 'string') {
-        fields[key] = { stringValue: val };
-      } else if (typeof val === 'number') {
-        fields[key] = Number.isInteger(val) ? { integerValue: val.toString() } : { doubleValue: val };
-      } else if (Array.isArray(val)) {
-        fields[key] = {
-          arrayValue: {
-            values: val.map(item => ({ stringValue: typeof item === 'object' ? JSON.stringify(item) : String(item) }))
-          }
-        };
-      }
+      fields[key] = formatFirestoreValue(obj[key]);
     }
     return fields;
+  }
+
+  function formatFirestoreValue(val) {
+    if (typeof val === 'string') return { stringValue: val };
+    if (typeof val === 'number') {
+      return Number.isInteger(val) ? { integerValue: val.toString() } : { doubleValue: val };
+    }
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (Array.isArray(val)) {
+      return {
+        arrayValue: {
+          values: val.map(item => formatFirestoreValue(item))
+        }
+      };
+    }
+    if (typeof val === 'object' && val !== null) {
+      return {
+        mapValue: {
+          fields: formatFirestoreFields(val)
+        }
+      };
+    }
+    return { stringValue: String(val) };
   }
 
   // --- Função para Zerar o Ranking ---
@@ -149,7 +165,7 @@
     }
   }
 
-  // --- Funções de Exportação e Importação de CSV com Setor e Provedora ---
+  // --- Exportar e Importar CSV ---
 
   async function exportarErrosParaCSV() {
     const listaErros = await firestoreGetCollection('erros');
@@ -158,13 +174,12 @@
       return;
     }
 
-    let csvContent = "\uFEFF"; // BOM para acentuação correta no Excel
+    let csvContent = "\uFEFF"; 
     csvContent += "Atendente;Setor;Provedora;Descrição;Hora;Timestamp\n";
 
     listaErros.forEach(item => {
       const nomeAtendente = item.atendente || '';
       
-      // Procura as informações de Setor e Provedora no cadastro do atendente
       const cadastro = estadoAtendentes.find(
         a => normalizarTexto(a.nome) === normalizarTexto(nomeAtendente)
       );
@@ -172,7 +187,7 @@
       const setor = (cadastro ? cadastro.setor : 'Geral').replace(/;/g, ',');
       const provedora = (cadastro ? cadastro.provedora : 'Geral').replace(/;/g, ',');
       const atendenteClean = nomeAtendente.replace(/;/g, ',');
-      const descricao = (item.descricao || '').replace(/;/g, ',');
+      const descricao = (item.descricao || item.descricao || '').replace(/;/g, ',');
       const hora = (item.hora || '').replace(/;/g, ',');
       const timestamp = item.timestamp || '';
 
@@ -206,7 +221,6 @@
 
         const colunas = linha.split(';');
         
-        // Verifica se é o formato novo (6 colunas) ou antigo (4 colunas)
         if (colunas.length >= 6) {
           const atendente = colunas[0].trim();
           const descricao = colunas[3].trim();
@@ -256,9 +270,20 @@
     const docAtendentes = await firestoreGetDoc('config', 'atendentes');
     if (docAtendentes && docAtendentes.lista) {
       estadoAtendentes = docAtendentes.lista.map(item => {
-        if (typeof item === 'string') return { nome: item, setor: 'Geral', provedora: 'Geral' };
+        if (typeof item === 'string') {
+          try {
+            const jsonParsed = JSON.parse(item);
+            return {
+              nome: jsonParsed.nome || '',
+              setor: jsonParsed.setor || 'Geral',
+              provedora: jsonParsed.provedora || 'Geral'
+            };
+          } catch(e) {
+            return { nome: item, setor: 'Geral', provedora: 'Geral' };
+          }
+        }
         return {
-          nome: item.nome,
+          nome: item.nome || '',
           setor: item.setor || 'Geral',
           provedora: item.provedora || 'Geral'
         };
@@ -273,22 +298,25 @@
     estadoErros = {};
 
     listaErros.forEach(item => {
-      const nomeErroNormalizado = normalizarTexto(item.atendente);
+      const nomeAtendente = item.atendente || '';
+      const nomeErroNormalizado = normalizarTexto(nomeAtendente);
       if (!nomeErroNormalizado) return;
 
       const atendenteEncontrado = estadoAtendentes.find(
         a => normalizarTexto(a.nome) === nomeErroNormalizado
       );
 
-      const nomeChave = atendenteEncontrado ? atendenteEncontrado.nome : item.atendente;
+      const nomeChave = atendenteEncontrado ? atendenteEncontrado.nome : nomeAtendente;
 
       if (!estadoErros[nomeChave]) {
         estadoErros[nomeChave] = { total: 0, historico: [] };
       }
 
+      const desc = item.descricao || item.descricao || 'Não especificado';
+
       estadoErros[nomeChave].total += 1;
       estadoErros[nomeChave].historico.push({
-        erro: item.descricao || 'Não especificado',
+        erro: desc,
         data: item.hora ? `${item.hora}` : 'Sem horário'
       });
     });
@@ -523,7 +551,8 @@
       if (!novoNome) return alert('O nome não pode ficar vazio.');
 
       estadoAtendentes = estadoAtendentes.map(a => {
-        if (a.nome === nomeAtual) {
+        const nomeItem = typeof a === 'string' ? JSON.parse(a).nome : a.nome;
+        if (normalizarTexto(nomeItem) === normalizarTexto(nomeAtual)) {
           return { nome: novoNome, setor: novoSetor, provedora: novaProvedora };
         }
         return a;
@@ -537,7 +566,18 @@
 
   async function removerAtendente(nome) {
     if (confirm(`Remover ${nome} da lista e apagar todos os registros de erros vinculados no Firebase?`)) {
-      estadoAtendentes = estadoAtendentes.filter(item => item.nome !== nome);
+      estadoAtendentes = estadoAtendentes.filter(item => {
+        let nomeItem = item.nome;
+        if (!nomeItem && typeof item === 'string') {
+          try {
+            nomeItem = JSON.parse(item).nome;
+          } catch(e) {
+            nomeItem = item;
+          }
+        }
+        return normalizarTexto(nomeItem) !== normalizarTexto(nome);
+      });
+
       await firestoreSetDoc('config', 'atendentes', { lista: estadoAtendentes });
 
       const listaErros = await firestoreGetCollection('erros');
@@ -569,50 +609,64 @@
       <button class="erros-btn-close" id="erros-close-panel">✕</button>
     </div>
 
-    <div class="erros-card">
-      <div class="erros-form-group">
-        <label>Filtrar por Provedora</label>
-        <select id="erros-filtro-provedora">
-          <option value="TODAS">Todas as Provedoras</option>
-        </select>
-      </div>
+    <!-- CARD 1: REGISTRAR OCORRÊNCIA (RETRÁTIL) -->
+    <div class="erros-card erros-card-collapsible" id="card-registrar">
+      <button class="erros-card-header" id="toggle-card-registrar" type="button">
+        <span>📝 REGISTRAR OCORRÊNCIA</span>
+        <span class="erros-arrow">▾</span>
+      </button>
+      <div class="erros-card-body">
+        <div class="erros-form-group">
+          <label>Filtrar por Provedora</label>
+          <select id="erros-filtro-provedora">
+            <option value="TODAS">Todas as Provedoras</option>
+          </select>
+        </div>
 
-      <div class="erros-form-group">
-        <label>Filtrar por Setor</label>
-        <select id="erros-filtro-setor">
-          <option value="TODOS">Todos os Setores</option>
-        </select>
-      </div>
+        <div class="erros-form-group">
+          <label>Filtrar por Setor</label>
+          <select id="erros-filtro-setor">
+            <option value="TODOS">Todos os Setores</option>
+          </select>
+        </div>
 
-      <div class="erros-form-group">
-        <label>Atendente</label>
-        <select id="erros-select-atendente">
-          <option value="">-- Selecione --</option>
-        </select>
-      </div>
+        <div class="erros-form-group">
+          <label>Atendente</label>
+          <select id="erros-select-atendente">
+            <option value="">-- Selecione --</option>
+          </select>
+        </div>
 
-      <div class="erros-form-group">
-        <label>Descrição do Erro</label>
-        <input type="text" id="erros-input-erro" placeholder="Ex: Informação incorreta">
-      </div>
+        <div class="erros-form-group">
+          <label>Descrição do Erro</label>
+          <input type="text" id="erros-input-erro" placeholder="Ex: Informação incorreta">
+        </div>
 
-      <button id="erros-btn-salvar" class="erros-btn-primary">Registrar Ocorrência</button>
+        <button id="erros-btn-salvar" class="erros-btn-primary">Registrar Ocorrência</button>
+      </div>
     </div>
 
-    <div class="erros-card">
-      <label>Novo Atendente</label>
-      <div class="erros-form-group" style="margin-top: 6px;">
-        <input type="text" id="erros-novo-atendente" placeholder="Nome completo">
+    <!-- CARD 2: NOVO ATENDENTE (RETRÁTIL) -->
+    <div class="erros-card erros-card-collapsible" id="card-atendente">
+      <button class="erros-card-header" id="toggle-card-atendente" type="button">
+        <span>👤 NOVO ATENDENTE</span>
+        <span class="erros-arrow">▾</span>
+      </button>
+      <div class="erros-card-body">
+        <div class="erros-form-group">
+          <input type="text" id="erros-novo-atendente" placeholder="Nome completo">
+        </div>
+        <div class="erros-form-group">
+          <input type="text" id="erros-novo-provedora" placeholder="Provedora (Ex: Provedora A)">
+        </div>
+        <div class="erros-form-group">
+          <input type="text" id="erros-novo-setor" placeholder="Setor (Ex: Suporte)">
+        </div>
+        <button id="erros-btn-add" class="erros-btn-secondary" style="width: 100%;">Adicionar Atendente</button>
       </div>
-      <div class="erros-form-group">
-        <input type="text" id="erros-novo-provedora" placeholder="Provedora (Ex: Provedora A)">
-      </div>
-      <div class="erros-form-group">
-        <input type="text" id="erros-novo-setor" placeholder="Setor (Ex: Suporte)">
-      </div>
-      <button id="erros-btn-add" class="erros-btn-secondary" style="width: 100%;">Adicionar Atendente</button>
     </div>
 
+    <!-- CARD BACKUP -->
     <div class="erros-card">
       <label>Backup de Dados (CSV)</label>
       <div style="display: flex; gap: 8px; margin-top: 6px;">
@@ -622,6 +676,7 @@
       <input type="file" id="erros-input-file-csv" accept=".csv" style="display: none;">
     </div>
 
+    <!-- CARD ZERAR RANKING -->
     <div class="erros-card">
       <button id="erros-btn-zerar-ranking" class="erros-btn-clear" style="width: 100%; margin-top: 0; background-color: #ef4444; color: #ffffff; font-weight: bold;">🔄 Zerar Ranking</button>
     </div>
@@ -650,6 +705,20 @@
 
     const closeBtn = document.getElementById('erros-close-panel');
     if (closeBtn) closeBtn.addEventListener('click', togglePainel);
+
+    // Toggle retrátil dos cards
+    const setupCollapsible = (headerId, cardId) => {
+      const header = document.getElementById(headerId);
+      const card = document.getElementById(cardId);
+      if (header && card) {
+        header.addEventListener('click', () => {
+          card.classList.toggle('collapsed');
+        });
+      }
+    };
+
+    setupCollapsible('toggle-card-registrar', 'card-registrar');
+    setupCollapsible('toggle-card-atendente', 'card-atendente');
 
     const selectAtendente = document.getElementById('erros-select-atendente');
     const selectFiltroSetor = document.getElementById('erros-filtro-setor');
